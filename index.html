@@ -13,87 +13,397 @@
     --paper: #F5F7FA;
     --teal: #2E8B8B;
     --amber: #E8A33D;
+    --red: #C1666B;
     --ink: #1C1F26;
     --line: #D8DEE6;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'IBM Plex Sans', sans-serif; line-height: 1.55; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'IBM Plex Sans', sans-serif; line-height: 1.55; overflow-x: hidden; }
   .wrap { max-width: 820px; margin: 0 auto; padding: 48px 24px 80px; }
-  .report-header { background: var(--navy); color: var(--paper); border-radius: 6px; padding: 28px 28px 22px; margin-bottom: 28px; }
-  .report-label { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber); margin: 0 0 6px; }
-  h1 { font-family: 'IBM Plex Mono', monospace; font-size: 30px; font-weight: 700; margin: 0 0 4px; letter-spacing: -0.01em; }
-  .role-line { font-size: 15px; color: #C4D0DE; margin: 0 0 18px; }
-  .contact-row { display: flex; flex-wrap: wrap; gap: 14px; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: #C4D0DE; }
-  .contact-row a { color: #C4D0DE; text-decoration: none; border-bottom: 1px dotted #5C7086; }
-  .contact-row a:hover { color: #fff; }
-  .summary-strip { display: flex; gap: 0; margin-top: 20px; border-top: 1px solid #33455E; padding-top: 16px; }
+
+  /* ---------- Terminal boot ---------- */
+  .boot {
+    background: #0D1520;
+    color: #7FE8C0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+    min-height: 88px;
+    box-shadow: inset 0 0 0 1px #1f3040;
+  }
+  .boot-line { opacity: 0; white-space: pre; }
+  .boot-line.show { opacity: 1; }
+  .boot .cursor2 {
+    display: inline-block; width: 6px; height: 12px; background: #7FE8C0;
+    vertical-align: -1px; animation: blink 1s step-end infinite;
+  }
+
+  /* ---------- Header ---------- */
+  .report-header {
+    position: relative;
+    background: var(--navy);
+    color: var(--paper);
+    border-radius: 6px;
+    padding: 28px 28px 22px;
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+  .report-header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(46,139,139,0.25), transparent 45%),
+      radial-gradient(circle at 85% 80%, rgba(232,163,61,0.15), transparent 50%);
+    animation: driftGlow 14s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+  @keyframes driftGlow {
+    0%   { transform: translate(0,0) scale(1); }
+    100% { transform: translate(-3%, 3%) scale(1.08); }
+  }
+  .header-inner { position: relative; z-index: 2; }
+
+  .report-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin: 0 0 6px;
+    opacity: 0;
+    animation: fadeUp .5s ease forwards;
+  }
+  .report-label .cursor { display: inline-block; width: 7px; height: 13px; background: var(--amber); margin-left: 4px; vertical-align: -2px; animation: blink 1s step-end infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  h1 { font-family: 'IBM Plex Mono', monospace; font-size: 30px; font-weight: 700; margin: 0 0 4px; letter-spacing: -0.01em; opacity: 0; animation: fadeUp .6s ease forwards; animation-delay: .15s; }
+  .role-line { font-size: 15px; color: #C4D0DE; margin: 0 0 18px; opacity: 0; animation: fadeUp .6s ease forwards; animation-delay: .3s; }
+  .contact-row { display: flex; flex-wrap: wrap; gap: 14px; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: #C4D0DE; opacity: 0; animation: fadeUp .6s ease forwards; animation-delay: .42s; }
+  .contact-row a { color: #C4D0DE; text-decoration: none; border-bottom: 1px dotted #5C7086; transition: color .2s; }
+  .contact-row a:hover { color: #fff; border-bottom-color: var(--teal); }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Bug hunt strip */
+  .bughunt {
+    position: relative;
+    margin-top: 18px;
+    padding: 14px 14px 34px;
+    background: rgba(255,255,255,0.04);
+    border: 1px dashed #3B4F68;
+    border-radius: 6px;
+    opacity: 0;
+    animation: fadeUp .6s ease forwards;
+    animation-delay: .52s;
+    overflow: hidden;
+  }
+  .bughunt-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #9FB0C3;
+  }
+  .bughunt-label b { color: var(--teal); }
+  .bug-field { position: relative; height: 38px; }
+  .bug {
+    position: absolute;
+    top: 6px;
+    font-size: 17px;
+    cursor: pointer;
+    user-select: none;
+    animation: crawl 6s ease-in-out infinite alternate;
+    transition: transform .25s ease;
+  }
+  .bug:hover { transform: scale(1.2); }
+  .bug.squashed {
+    animation: none;
+    pointer-events: none;
+  }
+  .bug.squashed .b-icon { animation: squash .4s ease forwards; }
+  .bug.squashed .b-check { animation: popIn .4s ease .1s forwards; }
+  .b-check { opacity: 0; transform: scale(0); display: inline-block; color: var(--teal); font-weight: 700; }
+  @keyframes squash { to { transform: scale(0) rotate(30deg); opacity: 0; } }
+  @keyframes popIn { to { opacity: 1; transform: scale(1); } }
+  @keyframes crawl {
+    0%   { transform: translateX(0) translateY(0) rotate(0deg); }
+    25%  { transform: translateX(40px) translateY(-4px) rotate(8deg); }
+    50%  { transform: translateX(90px) translateY(3px) rotate(-6deg); }
+    75%  { transform: translateX(140px) translateY(-2px) rotate(4deg); }
+    100% { transform: translateX(200px) translateY(0) rotate(0deg); }
+  }
+
+  .summary-strip { display: flex; gap: 0; margin-top: 20px; border-top: 1px solid #33455E; padding-top: 16px; opacity: 0; animation: fadeUp .6s ease forwards; animation-delay: .6s; }
   .stat { flex: 1; }
   .stat .num { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; color: var(--teal); }
   .stat .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #9FB0C3; }
-  .suite { margin-bottom: 30px; }
-  .suite-title { display: flex; align-items: center; gap: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate); margin: 0 0 14px; padding-bottom: 8px; border-bottom: 2px solid var(--line); }
-  .suite-title::before { content: "▸"; color: var(--teal); }
+
+  /* ---------- Scroll-reveal sections ---------- */
+  .suite { margin-bottom: 30px; opacity: 0; transform: translateY(24px); transition: opacity .6s ease, transform .6s ease; }
+  .suite.in-view { opacity: 1; transform: translateY(0); }
+
+  .suite-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin: 0 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--line);
+    position: relative;
+  }
+  .st-left { display: flex; align-items: center; gap: 10px; }
+  .st-left::before { content: "▸"; color: var(--teal); }
+  .st-status {
+    font-size: 10.5px;
+    letter-spacing: .06em;
+    color: var(--amber);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .st-status .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); animation: pulse 1s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .3; transform: scale(.7); } }
+  .suite.passed .st-status { color: var(--teal); }
+  .suite.passed .st-status .dot { display: none; }
+  .suite.passed .st-status::before { content: "✓"; font-weight: 700; }
+
   .skill-cat { margin-bottom: 14px; }
   .skill-cat-label { font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
   .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
-  .skill-chip { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--line); border-radius: 5px; padding: 9px 11px; font-size: 13px; }
-  .skill-chip .check { font-family: 'IBM Plex Mono', monospace; color: var(--teal); font-weight: 700; font-size: 12px; }
-  .release { background: #fff; border: 1px solid var(--line); border-left: 3px solid var(--teal); border-radius: 5px; padding: 16px 18px; margin-bottom: 14px; }
+  .skill-chip {
+    display: flex; align-items: center; gap: 8px;
+    background: #fff; border: 1px solid var(--line); border-radius: 5px;
+    padding: 9px 11px; font-size: 13px;
+    opacity: 0; transform: translateY(8px) scale(.98);
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  }
+  .suite.in-view .skill-chip { animation: chipIn .4s ease forwards; }
+  .skill-chip:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(27,42,65,0.1); border-color: var(--teal); }
+  @keyframes chipIn { to { opacity: 1; transform: translateY(0) scale(1); } }
+  .chip-icon { position: relative; width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center; }
+  .chip-icon .ic-bug, .chip-icon .ic-check {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    transition: opacity .3s ease, transform .3s ease;
+  }
+  .chip-icon .ic-bug { font-size: 12px; opacity: 1; transform: scale(1) rotate(0); }
+  .chip-icon .ic-check { font-size: 12px; color: var(--teal); font-weight: 700; opacity: 0; transform: scale(0) rotate(-30deg); }
+  .skill-chip.chip-squashed .ic-bug { opacity: 0; transform: scale(0) rotate(40deg); }
+  .skill-chip.chip-squashed .ic-check { opacity: 1; transform: scale(1) rotate(0); }
+
+  .release, .project-card {
+    background: #fff; border: 1px solid var(--line); border-radius: 5px; padding: 16px 18px; margin-bottom: 14px;
+    transition: transform .25s ease, box-shadow .25s ease, border-left-width .25s ease;
+  }
+  .release { border-left: 3px solid var(--teal); }
   .release.current { border-left-color: var(--amber); }
-  .release-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+  .release:hover, .project-card:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(27,42,65,0.1); }
+
+  .release-head, .project-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
   .release-tag { font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--slate); background: var(--paper); padding: 2px 8px; border-radius: 3px; border: 1px solid var(--line); }
   .release-title { font-size: 16px; font-weight: 600; margin: 0; }
   .release-meta { font-size: 12.5px; color: var(--slate); margin: 2px 0 10px; }
-  .release ul { margin: 0; padding-left: 18px; }
-  .release li { font-size: 13.5px; margin-bottom: 5px; color: #333; }
-  .project-card { background: #fff; border: 1px solid var(--line); border-radius: 5px; padding: 16px 18px; margin-bottom: 14px; }
-  .project-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 6px; }
+  .release ul, .project-card ul { margin: 0; padding-left: 18px; }
+  .release li, .project-card li { font-size: 13.5px; margin-bottom: 5px; color: #333; }
+
   .project-name { font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 700; color: var(--navy); margin: 0; }
   .project-tag { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--teal); background: #EAF5F5; padding: 2px 7px; border-radius: 3px; }
-  .project-meta { font-size: 12.5px; color: var(--slate); margin: 4px 0 10px; }
-  .project-card ul { margin: 0; padding-left: 18px; }
-  .project-card li { font-size: 13.5px; margin-bottom: 5px; color: #333; }
-  .row-item { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+  .project-meta { font-size: 12.5px; color: var(--slate); margin: 4px 0 6px; }
+  .defect-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11.5px;
+    background: #FBEAEA; color: var(--red); border-radius: 4px; padding: 3px 8px; margin-bottom: 10px;
+  }
+  .defect-badge .n { font-weight: 700; }
+
+  .row-item { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; transition: padding-left .2s ease; }
+  .row-item:hover { padding-left: 6px; border-bottom-color: var(--teal); }
   .row-item:last-child { border-bottom: none; }
   .row-item .title { font-weight: 600; }
   .row-item .meta { color: var(--slate); font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+
   .strength-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
-  .strength-card { background: #fff; border: 1px solid var(--line); border-radius: 5px; padding: 12px 14px; }
+  .strength-card { background: #fff; border: 1px solid var(--line); border-radius: 5px; padding: 12px 14px; transition: transform .2s ease, box-shadow .2s ease; }
+  .strength-card:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(27,42,65,0.08); }
   .strength-card .name { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 700; color: var(--teal); display: block; margin-bottom: 4px; }
   .strength-card .desc { font-size: 13px; color: #333; }
-  footer { text-align: center; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--slate); margin-top: 40px; }
-  @media print { body { background: #fff; } .report-header { background: var(--navy) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
-  @media (max-width: 480px) { h1 { font-size: 24px; } .summary-strip { flex-wrap: wrap; } .stat { flex: 1 1 50%; margin-bottom: 10px; } }
+
+  footer { text-align: center; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--slate); margin-top: 40px; opacity: 0; transition: opacity .6s ease; }
+  footer.in-view { opacity: 1; }
+
+  /* ---------- Tools in Action ---------- */
+  .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  .tool-card { background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px 14px; }
+  .tool-card-label {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--slate); margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+  }
+  .tool-card-label .swatch { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* Selenium mock browser */
+  .sel-mock { position: relative; height: 92px; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; background: #FBFCFE; }
+  .sel-topbar { height: 18px; background: #EEF1F5; display: flex; align-items: center; gap: 4px; padding: 0 6px; border-bottom: 1px solid var(--line); }
+  .sel-topbar span { width: 6px; height: 6px; border-radius: 50%; background: #C7CFDA; }
+  .sel-addr { font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: var(--slate); margin-left: 4px; }
+  .sel-body { position: relative; height: 74px; }
+  .sel-btn {
+    position: absolute; right: 14px; bottom: 14px; font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    color: #fff; padding: 5px 12px; border-radius: 4px; background: var(--teal);
+    animation: selBtnGlow 6s infinite;
+  }
+  .sel-cursor {
+    position: absolute; font-size: 13px; animation: selCursorMove 6s infinite;
+  }
+  .sel-ripple {
+    position: absolute; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--teal);
+    right: 22px; bottom: 18px; opacity: 0; animation: selRipple 6s infinite;
+  }
+  @keyframes selCursorMove {
+    0%   { top: 12px; left: 10px; opacity: 0; }
+    5%   { opacity: 1; }
+    55%  { top: 50px; left: 130px; opacity: 1; }
+    62%  { top: 50px; left: 130px; transform: scale(.85); }
+    68%  { transform: scale(1); }
+    92%  { top: 50px; left: 130px; opacity: 1; }
+    100% { top: 12px; left: 10px; opacity: 0; }
+  }
+  @keyframes selBtnGlow {
+    0%, 54%, 100% { box-shadow: none; background: var(--teal); }
+    60%, 75% { box-shadow: 0 0 0 6px rgba(46,139,139,0.22); background: #256E6E; }
+  }
+  @keyframes selRipple {
+    0%, 56% { opacity: 0; transform: scale(.4); }
+    62% { opacity: .8; transform: scale(1); }
+    78% { opacity: 0; transform: scale(1.6); }
+    100% { opacity: 0; }
+  }
+
+  /* Postman mock request/response */
+  .pm-mock { font-family: 'IBM Plex Mono', monospace; font-size: 12px; height: 92px; display: flex; flex-direction: column; justify-content: center; gap: 10px; }
+  .pm-req { display: flex; align-items: center; gap: 8px; }
+  .pm-method { background: #EAF5F5; color: var(--teal); font-weight: 700; padding: 2px 7px; border-radius: 3px; font-size: 10.5px; }
+  .pm-url { color: var(--ink); }
+  .pm-arrow { color: var(--slate); animation: pmArrow 5s infinite; }
+  .pm-resp { display: flex; align-items: center; gap: 8px; opacity: 0; animation: pmResp 5s infinite; }
+  .pm-status { background: #E9F7EE; color: #2E8B57; font-weight: 700; padding: 2px 7px; border-radius: 3px; font-size: 10.5px; }
+  .pm-json { color: var(--slate); font-size: 11px; }
+  @keyframes pmArrow {
+    0%, 15% { transform: translateX(0); opacity: .5; }
+    35% { transform: translateX(16px); opacity: 1; }
+    50%, 100% { transform: translateX(0); opacity: .5; }
+  }
+  @keyframes pmResp {
+    0%, 40% { opacity: 0; transform: translateY(4px); }
+    55%, 90% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; }
+  }
+
+  /* SQL mock terminal */
+  .sql-mock { background: #0D1520; border-radius: 4px; height: 92px; padding: 10px 12px; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: #7FE8C0; overflow: hidden; }
+  .sql-line { white-space: nowrap; overflow: hidden; border-right: 2px solid #7FE8C0; width: 0; animation: sqlType 6s infinite; }
+  .sql-out { color: #9FB0C3; margin-top: 8px; opacity: 0; animation: sqlOut 6s infinite; }
+  @keyframes sqlType {
+    0% { width: 0; }
+    45% { width: 27ch; }
+    85% { width: 27ch; }
+    92%, 100% { width: 0; }
+  }
+  @keyframes sqlOut {
+    0%, 48% { opacity: 0; }
+    58%, 85% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  /* JIRA mock kanban */
+  .jira-mock { position: relative; height: 92px; }
+  .jira-cols { display: flex; gap: 6px; height: 100%; }
+  .jira-col { flex: 1; background: #F1F3F6; border-radius: 4px; padding: 4px 0 0; }
+  .jira-col-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; text-align: center; color: var(--slate); text-transform: uppercase; letter-spacing: .04em; }
+  .jira-ticket {
+    position: absolute; top: 26px; width: 29%; left: 2%;
+    background: #fff; border: 1.5px solid var(--slate); border-radius: 4px; padding: 6px 7px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: var(--ink);
+    animation: jiraMove 7s infinite;
+  }
+  .jira-ticket .tid { color: var(--slate); display: block; font-size: 8.5px; margin-bottom: 2px; }
+  @keyframes jiraMove {
+    0%, 12%  { left: 2%; border-color: var(--slate); }
+    38%, 55% { left: 35.5%; border-color: var(--amber); }
+    80%, 95% { left: 69%; border-color: var(--teal); }
+    100% { left: 2%; border-color: var(--slate); }
+  }
+
+  @media print {
+    body { background: #fff; }
+    .report-header { background: var(--navy) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .suite, .skill-chip, footer, .bughunt, .boot { opacity: 1 !important; transform: none !important; }
+    .bughunt { display: none; }
+    .tools-grid { display: none; }
+  }
+
+  @media (max-width: 480px) {
+    h1 { font-size: 24px; }
+    .summary-strip { flex-wrap: wrap; }
+    .stat { flex: 1 1 50%; margin-bottom: 10px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before { animation: none !important; transition: none !important; }
+    .suite, .skill-chip, .report-label, h1, .role-line, .contact-row, .summary-strip, footer, .bughunt, .boot-line { opacity: 1 !important; transform: none !important; }
+    .sel-cursor, .sel-btn, .sel-ripple, .pm-arrow, .pm-resp, .sql-line, .sql-out, .jira-ticket { animation: none !important; }
+    .pm-resp, .sql-out { opacity: 1 !important; }
+    .sql-line { width: 27ch !important; border-right: none !important; }
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
 
+  <div class="boot" id="boot"></div>
+
   <header class="report-header">
-    <p class="report-label">QA_Report // build passing</p>
-    <h1>Yerikipati Naga Sriharsha</h1>
-    <p class="role-line">QA Automation Engineer &middot; Selenium WebDriver &amp; Java &middot; Web &amp; Mobile App Testing &middot; 2+ Years</p>
-    <div class="contact-row">
-      <a href="mailto:sriharshayerikipati@gmail.com">sriharshayerikipati@gmail.com</a>
-      <span>·</span>
-      <span>+91 9951431689</span>
-      <span>·</span>
-      <a href="https://linkedin.com/in/nagasriharsha-yerikipati" target="_blank">linkedin.com/in/nagasriharsha-yerikipati</a>
-      <span>·</span>
-      <a href="https://github.com/harshayerikipati" target="_blank">github.com/harshayerikipati</a>
-      <span>·</span>
-      <span>Hyderabad, Telangana, India</span>
-    </div>
-    <div class="summary-strip">
-      <div class="stat"><div class="num">2+ yrs</div><div class="lbl">Experience</div></div>
-      <div class="stat"><div class="num">Selenium</div><div class="lbl">Java + TestNG + POM</div></div>
-      <div class="stat"><div class="num">SQL</div><div class="lbl">MySQL Validation</div></div>
-      <div class="stat"><div class="num">Postman</div><div class="lbl">REST API Testing</div></div>
+    <div class="header-inner">
+      <p class="report-label">QA_Report // build passing<span class="cursor"></span></p>
+      <h1>Yerikipati Naga Sriharsha</h1>
+      <p class="role-line">QA Automation Engineer &middot; Selenium WebDriver &amp; Java &middot; Web &amp; Mobile App Testing &middot; 2+ Years</p>
+      <div class="contact-row">
+        <a href="mailto:sriharshayerikipati@gmail.com">sriharshayerikipati@gmail.com</a>
+        <span>·</span>
+        <span>+91 9951431689</span>
+        <span>·</span>
+        <a href="https://linkedin.com/in/nagasriharsha-yerikipati" target="_blank">linkedin.com/in/nagasriharsha-yerikipati</a>
+        <span>·</span>
+        <a href="https://github.com/harshayerikipati" target="_blank">github.com/harshayerikipati</a>
+        <span>·</span>
+        <span>Hyderabad, Telangana, India</span>
+      </div>
+
+      <div class="bughunt">
+        <div class="bughunt-label">🐛 Live defect field — <b><span id="bugCount">0</span>/6</b> squashed. Click a bug to fix it.</div>
+        <div class="bug-field" id="bugField"></div>
+      </div>
+
+      <div class="summary-strip">
+        <div class="stat"><div class="num" data-count="2" data-suffix="+ yrs">0</div><div class="lbl">Experience</div></div>
+        <div class="stat"><div class="num">Selenium</div><div class="lbl">Java + TestNG + POM</div></div>
+        <div class="stat"><div class="num">SQL</div><div class="lbl">MySQL Validation</div></div>
+        <div class="stat"><div class="num">Postman</div><div class="lbl">REST API Testing</div></div>
+      </div>
     </div>
   </header>
 
   <section class="suite">
-    <h2 class="suite-title">Summary</h2>
+    <h2 class="suite-title"><span class="st-left">Summary</span><span class="st-status"><span class="dot"></span>running</span></h2>
     <p style="margin:0; font-size:14px;">
       QA Engineer with 2+ years driving quality across web and mobile platforms (Android &amp; iOS) through a blend of manual and
       Selenium/Java/TestNG automation testing. Built and scaled a Page Object Model automation framework that cut manual
@@ -105,55 +415,102 @@
   </section>
 
   <section class="suite">
-    <h2 class="suite-title">Technical Skills</h2>
+    <h2 class="suite-title"><span class="st-left">Tools in Action</span><span class="st-status"><span class="dot"></span>running</span></h2>
+    <div class="tools-grid">
+
+      <div class="tool-card">
+        <div class="tool-card-label"><span class="swatch" style="background:var(--teal)"></span>Selenium WebDriver — click automation</div>
+        <div class="sel-mock">
+          <div class="sel-topbar"><span></span><span></span><span></span><span class="sel-addr">app.example.com/checkout</span></div>
+          <div class="sel-body">
+            <span class="sel-cursor">🖱️</span>
+            <span class="sel-ripple"></span>
+            <span class="sel-btn">Submit</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-label"><span class="swatch" style="background:#2E8B57"></span>Postman — REST API validation</div>
+        <div class="pm-mock">
+          <div class="pm-req"><span class="pm-method">GET</span><span class="pm-url">/api/orders/1042</span><span class="pm-arrow">➜</span></div>
+          <div class="pm-resp"><span class="pm-status">200 OK</span><span class="pm-json">{ "status": "confirmed" }</span></div>
+        </div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-label"><span class="swatch" style="background:#7FE8C0"></span>MySQL — data validation</div>
+        <div class="sql-mock">
+          <div class="sql-line">SELECT * FROM orders WHERE id=1042;</div>
+          <div class="sql-out">✓ 1 row returned — data matches expected</div>
+        </div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-label"><span class="swatch" style="background:var(--amber)"></span>JIRA — defect lifecycle</div>
+        <div class="jira-mock">
+          <div class="jira-cols">
+            <div class="jira-col"><div class="jira-col-label">To Do</div></div>
+            <div class="jira-col"><div class="jira-col-label">In Progress</div></div>
+            <div class="jira-col"><div class="jira-col-label">Done</div></div>
+          </div>
+          <div class="jira-ticket"><span class="tid">BUG-214</span>Checkout button unresponsive on iOS</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="suite">
+    <h2 class="suite-title"><span class="st-left">Technical Skills</span><span class="st-status"><span class="dot"></span>running</span></h2>
     <div class="skill-cat">
       <div class="skill-cat-label">Automation Testing</div>
       <div class="skills-grid">
-        <div class="skill-chip"><span class="check">✓</span> Selenium WebDriver</div>
-        <div class="skill-chip"><span class="check">✓</span> Java</div>
-        <div class="skill-chip"><span class="check">✓</span> TestNG</div>
-        <div class="skill-chip"><span class="check">✓</span> Maven</div>
-        <div class="skill-chip"><span class="check">✓</span> Page Object Model</div>
-        <div class="skill-chip"><span class="check">✓</span> Data-Driven Testing</div>
+        <div class="skill-chip"><span class="chip-icon"><span class="ic-bug">🐛</span><span class="ic-check">✓</span></span> Selenium WebDriver</div>
+        <div class="skill-chip"><span class="chip-icon"><span class="ic-bug">🐛</span><span class="ic-check">✓</span></span> Java</div>
+        <div class="skill-chip"><span class="chip-icon"><span class="ic-bug">🐛</span><span class="ic-check">✓</span></span> TestNG</div>
+        <div class="skill-chip"><span class="chip-icon"><span class="ic-bug">🐛</span><span class="ic-check">✓</span></span> Maven</div>
+        <div class="skill-chip"><span class="chip-icon"><span class="ic-bug">🐛</span><span class="ic-check">✓</span></span> Page Object Model</div>
+        <div class="skill-chip"><span class="chip-icon"><span class="ic-bug">🐛</span><span class="ic-check">✓</span></span> Data-Driven Testing</div>
       </div>
     </div>
     <div class="skill-cat">
       <div class="skill-cat-label">Manual &amp; Mobile Testing</div>
       <div class="skills-grid">
-        <div class="skill-chip"><span class="check">✓</span> Test Case Design</div>
-        <div class="skill-chip"><span class="check">✓</span> Functional / Regression</div>
-        <div class="skill-chip"><span class="check">✓</span> Smoke / Sanity / Exploratory</div>
-        <div class="skill-chip"><span class="check">✓</span> Android &amp; iOS Testing</div>
-        <div class="skill-chip"><span class="check">✓</span> Cross-Device Compatibility</div>
-        <div class="skill-chip"><span class="check">✓</span> Cross-Browser Testing</div>
+        <div class="skill-chip"><span class="chip-icon"><span class="ic-bug">🐛</span><span class="ic-check">✓</span></span> Test Case Design</div>
+        <div class="skill-chip"><span class="chip-icon"><span class="ic-bug">🐛</span><span class="ic-check">✓</span></span> Functional / Regression</div>
+        <div class="skill-chip"><span class="chip-icon"><span class="ic-bug">🐛</span><span class="ic-check">✓</span></span> Smoke / Sanity / Exploratory</div>
+        <div class="skill-chip"><span class="chip-icon"><span class="ic-bug">🐛</span><span class="ic-check">✓</span></span> Android &amp; iOS Testing</div>
+        <div class="skill-chip"><span class="chip-icon"><span class="ic-bug">🐛</span><span class="ic-check">✓</span></span> Cross-Device Compatibility</div>
+        <div class="skill-chip"><span class="chip-icon"><span class="ic-bug">🐛</span><span class="ic-check">✓</span></span> Cross-Browser Testing</div>
       </div>
     </div>
     <div class="skill-cat">
       <div class="skill-cat-label">API, Database &amp; Frontend</div>
       <div class="skills-grid">
-        <div class="skill-chip"><span class="check">✓</span> Postman (REST API)</div>
-        <div class="skill-chip"><span class="check">✓</span> MySQL</div>
-        <div class="skill-chip"><span class="check">✓</span> HTML5</div>
-        <div class="skill-chip"><span class="check">✓</span> CSS3</div>
-        <div class="skill-chip"><span class="check">✓</span> JavaScript</div>
-        <div class="skill-chip"><span class="check">✓</span> XPath / CSS Locators</div>
+        <div class="skill-chip"><span class="chip-icon"><span class="ic-bug">🐛</span><span class="ic-check">✓</span></span> Postman (REST API)</div>
+        <div class="skill-chip"><span class="chip-icon"><span class="ic-bug">🐛</span><span class="ic-check">✓</span></span> MySQL</div>
+        <div class="skill-chip"><span class="chip-icon"><span class="ic-bug">🐛</span><span class="ic-check">✓</span></span> HTML5</div>
+        <div class="skill-chip"><span class="chip-icon"><span class="ic-bug">🐛</span><span class="ic-check">✓</span></span> CSS3</div>
+        <div class="skill-chip"><span class="chip-icon"><span class="ic-bug">🐛</span><span class="ic-check">✓</span></span> JavaScript</div>
+        <div class="skill-chip"><span class="chip-icon"><span class="ic-bug">🐛</span><span class="ic-check">✓</span></span> XPath / CSS Locators</div>
       </div>
     </div>
     <div class="skill-cat">
       <div class="skill-cat-label">Tools &amp; Methodologies</div>
       <div class="skills-grid">
-        <div class="skill-chip"><span class="check">✓</span> JIRA</div>
-        <div class="skill-chip"><span class="check">✓</span> Git / GitHub</div>
-        <div class="skill-chip"><span class="check">✓</span> Eclipse / IntelliJ IDEA</div>
-        <div class="skill-chip"><span class="check">✓</span> Agile / Scrum</div>
-        <div class="skill-chip"><span class="check">✓</span> SDLC / STLC</div>
-        <div class="skill-chip"><span class="check">✓</span> Defect Life Cycle</div>
+        <div class="skill-chip"><span class="chip-icon"><span class="ic-bug">🐛</span><span class="ic-check">✓</span></span> JIRA</div>
+        <div class="skill-chip"><span class="chip-icon"><span class="ic-bug">🐛</span><span class="ic-check">✓</span></span> Git / GitHub</div>
+        <div class="skill-chip"><span class="chip-icon"><span class="ic-bug">🐛</span><span class="ic-check">✓</span></span> Eclipse / IntelliJ IDEA</div>
+        <div class="skill-chip"><span class="chip-icon"><span class="ic-bug">🐛</span><span class="ic-check">✓</span></span> Agile / Scrum</div>
+        <div class="skill-chip"><span class="chip-icon"><span class="ic-bug">🐛</span><span class="ic-check">✓</span></span> SDLC / STLC</div>
+        <div class="skill-chip"><span class="chip-icon"><span class="ic-bug">🐛</span><span class="ic-check">✓</span></span> Defect Life Cycle</div>
       </div>
     </div>
   </section>
 
   <section class="suite">
-    <h2 class="suite-title">Experience</h2>
+    <h2 class="suite-title"><span class="st-left">Experience</span><span class="st-status"><span class="dot"></span>running</span></h2>
     <div class="release current">
       <div class="release-head">
         <p class="release-title">Software Test Engineer, mTouch Labs Pvt Ltd</p>
@@ -175,59 +532,55 @@
   </section>
 
   <section class="suite">
-    <h2 class="suite-title">Projects</h2>
+    <h2 class="suite-title"><span class="st-left">Projects</span><span class="st-status"><span class="dot"></span>running</span></h2>
+
     <div class="project-card">
-      <div class="project-head">
-        <p class="project-name">Railcab</p>
-        <span class="project-tag">Web · Android · iOS</span>
-      </div>
+      <div class="project-head"><p class="project-name">Railcab</p><span class="project-tag">Web · Android · iOS</span></div>
       <p class="project-meta">Train &amp; Cab Booking Platform — Manual Testing, Mobile Testing, API Testing (Postman), JIRA</p>
+      <div class="defect-badge">🐛 defects logged: <span class="n" data-count="60" data-suffix="+">0</span></div>
       <ul>
         <li>Owned QA for the Admin Web portal spanning train scheduling, ETA cab booking, standard cab booking, and user/booking management modules.</li>
         <li>Executed 150+ test cases (functional, regression, smoke, sanity) across Android and iOS, ensuring consistent booking flows across multiple device types.</li>
-        <li>Validated booking, scheduling, and notification APIs via Postman, and logged 60+ defects in JIRA, with critical/high-severity issues resolved within Agile sprints.</li>
+        <li>Validated booking, scheduling, and notification APIs via Postman, with critical/high-severity issues resolved within Agile sprints.</li>
       </ul>
     </div>
+
     <div class="project-card">
-      <div class="project-head">
-        <p class="project-name">ResQBox</p>
-        <span class="project-tag">Web · Android · iOS</span>
-      </div>
+      <div class="project-head"><p class="project-name">ResQBox</p><span class="project-tag">Web · Android · iOS</span></div>
       <p class="project-meta">Restaurant Management Platform (Australia &amp; India) — Manual Testing, Mobile Testing, API Testing (Postman), JIRA</p>
+      <div class="defect-badge">🐛 defects logged: <span class="n" data-count="70" data-suffix="+">0</span></div>
       <ul>
         <li>Validated region-specific functionality and localization for a dual-market (Australia &amp; India) restaurant management platform.</li>
-        <li>Tested end-to-end onboarding, menu management, order processing, and payment flows across web and mobile, executing 180+ test cases and surfacing 70+ defects with detailed repro steps.</li>
-        <li>Verified order, menu, and payment APIs across both regional environments via Postman, and ran post-release regression to protect existing functionality after every release cycle.</li>
+        <li>Tested end-to-end onboarding, menu management, order processing, and payment flows across web and mobile, executing 180+ test cases with detailed repro steps.</li>
+        <li>Verified order, menu, and payment APIs across both regional environments via Postman, and ran post-release regression after every release cycle.</li>
       </ul>
     </div>
+
     <div class="project-card">
-      <div class="project-head">
-        <p class="project-name">ZunoSync AI</p>
-        <span class="project-tag">Web · Android · iOS</span>
-      </div>
+      <div class="project-head"><p class="project-name">ZunoSync AI</p><span class="project-tag">Web · Android · iOS</span></div>
       <p class="project-meta">AI-Powered Social Media Content Management (Internal Project) — Manual Testing, Mobile Testing, API Testing (Postman), JIRA</p>
+      <div class="defect-badge">🐛 defects logged: <span class="n" data-count="55" data-suffix="+">0</span></div>
       <ul>
         <li>Tested an AI-driven content platform covering AI image/video generation, instant and scheduled posting, and role-based access control (Viewer/Editor).</li>
         <li>Ran functional and exploratory testing on AI-generated content to validate output accuracy, quality, and edge-case behavior — an area with no fixed expected output.</li>
-        <li>Executed 160+ test cases and logged 55+ defects in JIRA with severity tagging, ensuring feature parity across web, Android, and iOS.</li>
+        <li>Executed 160+ test cases with severity tagging, ensuring feature parity across web, Android, and iOS.</li>
       </ul>
     </div>
+
     <div class="project-card">
-      <div class="project-head">
-        <p class="project-name">Salarient</p>
-        <span class="project-tag">Web · Android · iOS</span>
-      </div>
+      <div class="project-head"><p class="project-name">Salarient</p><span class="project-tag">Web · Android · iOS</span></div>
       <p class="project-meta">Attendance &amp; HR Management System (Keka-style) — Manual Testing, Mobile Testing, API Testing (Postman), JIRA</p>
+      <div class="defect-badge">🐛 defects logged: <span class="n" data-count="50" data-suffix="+">0</span></div>
       <ul>
         <li>Validated core HR workflows — check-in/check-out, leave management, payroll integration, and reporting — across web and mobile.</li>
         <li>Verified role-based access control for Admin, Manager, and Employee roles across all platforms, executing 140+ test cases spanning functional, regression, and UAT scenarios.</li>
-        <li>Logged 50+ defects in JIRA and partnered with the team in sprint meetings to prioritize and resolve critical issues quickly.</li>
+        <li>Partnered with the team in sprint meetings to prioritize and resolve critical issues quickly.</li>
       </ul>
     </div>
   </section>
 
   <section class="suite">
-    <h2 class="suite-title">Education &amp; Certifications</h2>
+    <h2 class="suite-title"><span class="st-left">Education &amp; Certifications</span><span class="st-status"><span class="dot"></span>running</span></h2>
     <div class="row-item"><span class="title">B.Tech, Velagapudi Ramakrishna Siddhartha Engineering College</span><span class="meta">Andhra Pradesh</span></div>
     <div class="row-item"><span class="title">Intermediate (MPC), Narayana Junior College</span><span class="meta">India</span></div>
     <div class="row-item"><span class="title">Responsive Web Design using Flexbox</span><span class="meta">Certification</span></div>
@@ -235,7 +588,7 @@
   </section>
 
   <section class="suite">
-    <h2 class="suite-title">Key Strengths</h2>
+    <h2 class="suite-title"><span class="st-left">Key Strengths</span><span class="st-status"><span class="dot"></span>running</span></h2>
     <div class="strength-grid">
       <div class="strength-card"><span class="name">Attention to Detail</span><span class="desc">Meticulous in test case design, defect identification, and root cause analysis.</span></div>
       <div class="strength-card"><span class="name">Quick Learner</span><span class="desc">Rapidly adapts to new tools, frameworks, and project environments.</span></div>
@@ -245,7 +598,111 @@
     </div>
   </section>
 
-  <footer>index.html · built for GitHub Pages</footer>
+  <footer>index.html · built for GitHub Pages · all suites passed ✓</footer>
 </div>
+
+<script>
+  // ---- Terminal boot sequence ----
+  const bootLines = [
+    "$ mvn test -Dsuite=Resume",
+    "Initializing QA_Report runner...",
+    "Loading profile: Yerikipati Naga Sriharsha",
+    "Tests found: 6 suites, 0 failures",
+    "BUILD SUCCESSFUL ✓"
+  ];
+  const bootEl = document.getElementById('boot');
+  bootLines.forEach((line, i) => {
+    const p = document.createElement('div');
+    p.className = 'boot-line';
+    p.textContent = line;
+    if (i === bootLines.length - 1) {
+      const c = document.createElement('span');
+      c.className = 'cursor2';
+      p.appendChild(document.createTextNode(' '));
+      p.appendChild(c);
+    }
+    bootEl.appendChild(p);
+  });
+  document.querySelectorAll('.boot-line').forEach((line, i) => {
+    setTimeout(() => line.classList.add('show'), 200 + i * 260);
+  });
+
+  // ---- Count-up helper ----
+  function animateCount(el, duration) {
+    const target = parseInt(el.getAttribute('data-count'), 10);
+    const suffix = el.getAttribute('data-suffix') || '';
+    const startTime = performance.now();
+    function tick(now) {
+      const progress = Math.min((now - startTime) / duration, 1);
+      el.textContent = Math.floor(progress * target) + suffix;
+      if (progress < 1) requestAnimationFrame(tick);
+      else el.textContent = target + suffix;
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // ---- Reveal sections, run "test", then mark passed ----
+  const revealTargets = document.querySelectorAll('.suite, footer');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        el.classList.add('in-view');
+        if (el.classList.contains('suite')) {
+          setTimeout(() => el.classList.add('passed'), 750);
+          el.querySelectorAll('.n[data-count]').forEach(n => animateCount(n, 900));
+        }
+        io.unobserve(el);
+      }
+    });
+  }, { threshold: 0.15 });
+  revealTargets.forEach(el => io.observe(el));
+
+  document.querySelectorAll('.skill-chip').forEach((chip, i) => {
+    chip.style.animationDelay = (i % 6) * 0.05 + 's';
+  });
+
+  // Sequentially "squash" skill-chip bugs into checkmarks once their suite is visible
+  document.querySelectorAll('.suite').forEach(suite => {
+    const chips = suite.querySelectorAll('.skill-chip');
+    if (!chips.length) return;
+    const suiteObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          chips.forEach((chip, i) => {
+            setTimeout(() => chip.classList.add('chip-squashed'), 500 + i * 90);
+          });
+          suiteObserver.disconnect();
+        }
+      });
+    }, { threshold: 0.15 });
+    suiteObserver.observe(suite);
+  });
+
+  // Header experience counter
+  const headerCounter = document.querySelector('.num[data-count="2"]');
+  if (headerCounter) setTimeout(() => animateCount(headerCounter, 900), 1400);
+
+  // ---- Live bug hunt field ----
+  const bugField = document.getElementById('bugField');
+  const bugCountEl = document.getElementById('bugCount');
+  const positions = [4, 40, 78, 116, 154, 190];
+  let squashed = 0;
+  positions.forEach((left, i) => {
+    const bug = document.createElement('span');
+    bug.className = 'bug';
+    bug.style.left = left + 'px';
+    bug.style.animationDuration = (5 + i * 0.7) + 's';
+    bug.style.animationDelay = (i * 0.3) + 's';
+    bug.innerHTML = '<span class="b-icon">🐛</span><span class="b-check">✓</span>';
+    bug.addEventListener('click', () => {
+      if (bug.classList.contains('squashed')) return;
+      bug.classList.add('squashed');
+      squashed++;
+      bugCountEl.textContent = squashed;
+    });
+    bugField.appendChild(bug);
+  });
+</script>
 </body>
 </html>
