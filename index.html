@@ -133,21 +133,53 @@
     margin: 0; background: var(--paper); color: var(--ink); font-family: 'Space Grotesk', 'IBM Plex Sans', sans-serif; line-height: 1.55; overflow-x: hidden;
     position: relative;
   }
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    background-image:
-      linear-gradient(rgba(46,139,139,0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(46,139,139,0.05) 1px, transparent 1px);
-    background-size: 34px 34px;
-    animation: gridDrift 22s linear infinite;
+  body::before { content: none; }
+
+  /* ---------- Device test-execution background ---------- */
+  .device-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+
+  .dev-phone {
+    position: absolute; bottom: 3vh; left: 3vw; width: 130px; height: 240px;
+    border: 3px solid var(--line); border-radius: 22px; opacity: .16;
+    overflow: hidden; background: transparent;
   }
-  @keyframes gridDrift {
-    from { background-position: 0 0, 0 0; }
-    to   { background-position: 34px 34px, 34px 34px; }
+  .dev-phone::before {
+    content: ""; position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+    width: 36px; height: 5px; border-radius: 3px; background: var(--line);
   }
+  .dev-browser {
+    position: absolute; top: 6vh; right: 3vw; width: 210px; height: 130px;
+    border: 3px solid var(--line); border-radius: 10px; opacity: .16; overflow: hidden;
+  }
+  .dev-browser-bar {
+    height: 16px; display: flex; align-items: center; gap: 3px; padding: 0 6px;
+    border-bottom: 2px solid var(--line);
+  }
+  .dev-browser-bar span { width: 5px; height: 5px; border-radius: 50%; background: var(--line); display: block; }
+
+  .dev-log {
+    position: absolute; left: 8px; right: 6px; top: 22px; bottom: 8px;
+    overflow: hidden; font-family: 'IBM Plex Mono', monospace; color: var(--teal);
+  }
+  .dev-phone .dev-log { top: 26px; font-size: 7.5px; }
+  .dev-browser .dev-log { font-size: 8px; }
+  .dev-log-inner { animation: logScroll 14s linear infinite; }
+  .dev-browser .dev-log-inner { animation-duration: 11s; }
+  .dev-log-inner p { margin: 0 0 6px; white-space: nowrap; }
+
+  @keyframes logScroll {
+    from { transform: translateY(0); }
+    to   { transform: translateY(-50%); }
+  }
+
+  @media (max-width: 640px) {
+    .dev-browser { width: 160px; height: 100px; }
+    .dev-phone { width: 100px; height: 180px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .dev-log-inner { animation: none !important; }
+  }
+
   /* ---------- Ambient Selenium automation background ---------- */
   .amb-bg { position: fixed; inset: 0; z-index: 60; overflow: hidden; pointer-events: none; }
 
@@ -686,6 +718,51 @@
 </style>
 </head>
 <body>
+<div class="device-bg" aria-hidden="true">
+  <div class="dev-phone">
+    <div class="dev-log">
+      <div class="dev-log-inner">
+        <p>▶ launching AVD Pixel_6...</p>
+        <p>✓ test_login_flow ... PASS</p>
+        <p>✓ test_checkout_flow ... PASS</p>
+        <p>▶ test_push_notify ...</p>
+        <p>✓ test_push_notify ... PASS</p>
+        <p>▶ running suite 4/9 (iOS)</p>
+        <p>✓ test_onboarding ... PASS</p>
+        <p>✓ test_payment ... PASS</p>
+        <p>▶ launching AVD Pixel_6...</p>
+        <p>✓ test_login_flow ... PASS</p>
+        <p>✓ test_checkout_flow ... PASS</p>
+        <p>▶ test_push_notify ...</p>
+        <p>✓ test_push_notify ... PASS</p>
+        <p>▶ running suite 4/9 (iOS)</p>
+        <p>✓ test_onboarding ... PASS</p>
+        <p>✓ test_payment ... PASS</p>
+      </div>
+    </div>
+  </div>
+  <div class="dev-browser">
+    <div class="dev-browser-bar"><span></span><span></span><span></span></div>
+    <div class="dev-log">
+      <div class="dev-log-inner">
+        <p>$ webdriver.get("app.example.com")</p>
+        <p>✓ Chrome 128 ... PASS</p>
+        <p>✓ Firefox 129 ... PASS</p>
+        <p>▶ Safari 17 ...</p>
+        <p>✓ Safari 17 ... PASS</p>
+        <p>▶ running regression suite 7/9</p>
+        <p>✓ Edge 126 ... PASS</p>
+        <p>$ webdriver.get("app.example.com")</p>
+        <p>✓ Chrome 128 ... PASS</p>
+        <p>✓ Firefox 129 ... PASS</p>
+        <p>▶ Safari 17 ...</p>
+        <p>✓ Safari 17 ... PASS</p>
+        <p>▶ running regression suite 7/9</p>
+        <p>✓ Edge 126 ... PASS</p>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="amb-bg" aria-hidden="true">
   <span class="amb-bug amb-bug1">🐛</span>
   <span class="amb-bug amb-bug2">🐛</span>
